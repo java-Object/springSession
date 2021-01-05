@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--
+        springsession是不会对代码进行修改的
+
+        session共享的方案：
+            1.域名相同，项目名称相同
+                http://localhost:8080/springsession/getSession
+                http://localhost:8081/springsession/getSession
+                解决方案：集成RedisHttpSessionConfiguration类就可以实现session共享
+
+            2.域名相同，项目名称不同
+                http://localhost:8080/spring/getSession
+                    cookie的path路径：/spring/
+                http://localhost:8081/session/getSession
+                    cookie的path路径：/session/
+                即使集成了RedisHttpSessionConfiguration也无法进行session容器的共享
+
+                解决方案：
+                    1.集成RedisHttpSessionConfiguration类就可以实现session共享
+                    2.初始化RedisHttpSessionConfiguration属性cookieSerializer
+                    3.设置cookieSerializer中属性的cookiePath为/
+
+             3.域名不同，项目名称相同或不同
+                http://beijing.myweb.com:8080/spring/setSession
+                    cookie的domain域名：beijing.myweb.com
+                http://nanjing.myweb.com:8081/session/getSession
+                    cookie的domain域名：nanjing.myweb.com
+                解决方案:
+                    1.集成RedisHttpSessionConfiguration类就可以实现session共享
+                    2.初始化RedisHttpSessionConfiguration属性cookieSerializer
+                    3.设置cookieSerializer中属性的cookiePath为/
+                    4.设置cookieSerializer中属性的domainName为myweb.com
+
+    -->
+
+    <bean id="defaultCookieSerializer" class="org.springframework.session.web.http.DefaultCookieSerializer">
+        <property name="cookiePath" value="/"/>
+        <property name="domainName" value="myweb.com" />
+    </bean>
+    <bean id="redisHttpSessionConfiguration" class="org.springframework.session.data.redis.config.annotation.web.http.RedisHttpSessionConfiguration">
+        <property name="cookieSerializer" ref="defaultCookieSerializer"></property>
+    </bean>
+
+</beans>
